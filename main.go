@@ -1,35 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-// Handler for "/"
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome to my Go Webserver 🚀")
-}
-
-// Handler for "/data"
-func dataHandler(w http.ResponseWriter, r *http.Request) {
-	// Example JSON response
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintln(w, `{"status": "ok", "message": "Hello from Go"}`)
-}
-
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", homeHandler)
-	mux.HandleFunc("/data", dataHandler)
+	r := gin.Default()
 
-	server := &http.Server{
-		Addr:    ":8080", // runs on http://localhost:8080
-		Handler: mux,
-	}
+	r.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "Welcome to Gin 🚀")
+	})
 
-	log.Println("Server started on http://localhost:8080")
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatal(err)
-	}
+	r.GET("/data", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "ok",
+			"message": "Hello from Gin",
+		})
+	})
+
+	r.Run(":8080")
 }
