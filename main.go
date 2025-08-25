@@ -3,12 +3,17 @@ package main
 import (
 	"net/http"
 
+	"github.com/Barbarpotato/Storix/configs"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+
+	configs.ConnectDB()
+
 	r := gin.Default()
 
+	// your existing endpoints remain
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Welcome to Gin 🚀")
 	})
