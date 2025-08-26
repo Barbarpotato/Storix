@@ -1,10 +1,9 @@
 package main
 
 import (
+	"github.com/Barbarpotato/Storix/app"
 	"github.com/Barbarpotato/Storix/configs"
-	"github.com/Barbarpotato/Storix/handler"
-	"github.com/Barbarpotato/Storix/repository"
-	"github.com/Barbarpotato/Storix/service"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,31 +12,53 @@ func main() {
 	// Connect to DB and capture the *gorm.DB instance
 	configs.ConnectDB()
 
+	app := app.NewApp(configs.DB)
+
 	r := gin.Default()
-
-	// your existing endpoints remain
-	// r.GET("/", func(c *gin.Context) {
-	// 	c.String(http.StatusOK, "Welcome to Gin 🚀")
-	// })
-
-	// r.GET("/data", func(c *gin.Context) {
-	// 	c.JSON(http.StatusOK, gin.H{
-	// 		"status":  "ok",
-	// 		"message": "Hello from Gin",
-	// 	})
-	// })
-
-	unitRepo := repository.NewUnitRepository(configs.DB)
-	unitService := service.NewUnitService(unitRepo)
-	unitHandler := handler.NewUnitHandler(unitService)
 
 	unitRoutes := r.Group("/units")
 	{
-		unitRoutes.POST("/", unitHandler.Create)
-		unitRoutes.GET("/", unitHandler.GetAll)
-		unitRoutes.GET("/:id", unitHandler.Get)
-		unitRoutes.PUT("/:id", unitHandler.Update)
-		unitRoutes.DELETE("/:id", unitHandler.Delete)
+		unitRoutes.POST("/", app.UnitHandler.Create)
+		unitRoutes.GET("/", app.UnitHandler.GetAll)
+		unitRoutes.GET("/:id", app.UnitHandler.Get)
+		unitRoutes.PUT("/:id", app.UnitHandler.Update)
+		unitRoutes.DELETE("/:id", app.UnitHandler.Delete)
+	}
+
+	clientRoutes := r.Group("/clients")
+	{
+		clientRoutes.POST("/", app.ClientHandler.Create)
+		clientRoutes.GET("/", app.ClientHandler.GetAll)
+		clientRoutes.GET("/:id", app.ClientHandler.Get)
+		clientRoutes.PUT("/:id", app.ClientHandler.Update)
+		clientRoutes.DELETE("/:id", app.ClientHandler.Delete)
+	}
+
+	warehouseRoutes := r.Group("/warehouses")
+	{
+		warehouseRoutes.POST("/", app.WarehouseHandler.Create)
+		warehouseRoutes.GET("/", app.WarehouseHandler.GetAll)
+		warehouseRoutes.GET("/:id", app.WarehouseHandler.Get)
+		warehouseRoutes.PUT("/:id", app.WarehouseHandler.Update)
+		warehouseRoutes.DELETE("/:id", app.WarehouseHandler.Delete)
+	}
+
+	itemRoutes := r.Group("/items")
+	{
+		itemRoutes.POST("/", app.ItemHandler.Create)
+		itemRoutes.GET("/", app.ItemHandler.GetAll)
+		itemRoutes.GET("/:id", app.ItemHandler.Get)
+		itemRoutes.PUT("/:id", app.ItemHandler.Update)
+		itemRoutes.DELETE("/:id", app.ItemHandler.Delete)
+	}
+
+	stockCardRoutes := r.Group("/stock-cards")
+	{
+		stockCardRoutes.POST("/", app.StockCardHandler.Create)
+		stockCardRoutes.GET("/", app.StockCardHandler.GetAll)
+		stockCardRoutes.GET("/:id", app.StockCardHandler.Get)
+		stockCardRoutes.PUT("/:id", app.StockCardHandler.Update)
+		stockCardRoutes.DELETE("/:id", app.StockCardHandler.Delete)
 	}
 
 	r.Run(":8080")
