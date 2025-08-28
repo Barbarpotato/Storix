@@ -21,8 +21,8 @@ func (s *ClientService) GetClient(id uint64) (*models.Client, error) {
 	return s.Repo.GetByID(id)
 }
 
-func (s *ClientService) GetClients() ([]models.Client, error) {
-	return s.Repo.GetAll()
+func (s *ClientService) GetClients(page, pageSize int, sortBy, order string) ([]models.Client, int64, error) {
+	return s.Repo.GetAll(page, pageSize, sortBy, order)
 }
 
 func (s *ClientService) UpdateClient(client *models.Client) error {

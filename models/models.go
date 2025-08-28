@@ -3,26 +3,22 @@ package models
 import "time"
 
 type Client struct {
-	ID         uint64      `gorm:"primaryKey;autoIncrement"`
-	Name       string      `gorm:"size:100;not null"`
-	Code       string      `gorm:"size:50;unique;not null"`
-	CreatedBy  string      `gorm:"size:100;not null"`
-	CreatedAt  time.Time   `gorm:"autoCreateTime"`
-	Warehouses []Warehouse `gorm:"foreignKey:ClientID"`
-	Items      []Item      `gorm:"foreignKey:ClientID"`
-	StockCards []StockCard `gorm:"foreignKey:ClientID"`
+	ID        uint64    `gorm:"primaryKey;autoIncrement"`
+	Name      string    `gorm:"size:100;not null"`
+	Code      string    `gorm:"size:50;unique;not null"`
+	CreatedBy string    `gorm:"size:100;not null"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
 
 type Warehouse struct {
-	ID         uint64      `gorm:"primaryKey;autoIncrement"`
-	ClientID   uint64      `gorm:"not null;index"`
-	Name       string      `gorm:"size:100;not null"`
-	Location   string      `gorm:"size:200"`
-	IsActive   bool        `gorm:"not null;default:false"`
-	CreatedBy  string      `gorm:"size:100;not null"`
-	CreatedAt  time.Time   `gorm:"autoCreateTime"`
-	Client     Client      `gorm:"foreignKey:ClientID"`
-	StockCards []StockCard `gorm:"foreignKey:WarehouseID"`
+	ID        uint64    `gorm:"primaryKey;autoIncrement"`
+	ClientID  uint64    `gorm:"not null;index"`
+	Name      string    `gorm:"size:100;not null"`
+	Location  string    `gorm:"size:200"`
+	IsActive  bool      `gorm:"not null;default:false"`
+	CreatedBy string    `gorm:"size:100;not null"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	Client    Client    `gorm:"foreignKey:ClientID"`
 }
 
 type Unit struct {
@@ -82,6 +78,7 @@ type StockCard struct {
 
 type AuditLog struct {
 	ID        uint64    `gorm:"primaryKey;autoIncrement"`
+	ClientID  uint64    `gorm:"not null;index"`    // link to client
 	TableName string    `gorm:"size:100;not null"` // nama tabel asal (item, warehouse, stock_card)
 	RecordID  uint64    `gorm:"not null"`          // ID record yang berubah
 	Action    string    `gorm:"type:enum('INSERT','UPDATE','DELETE');not null"`
@@ -89,4 +86,6 @@ type AuditLog struct {
 	NewData   string    `gorm:"type:json"`         // snapshot setelah perubahan
 	ChangedBy string    `gorm:"size:100;not null"` // user / system yang ubah
 	ChangedAt time.Time `gorm:"autoCreateTime"`    // timestamp perubahan
+
+	Client Client `gorm:"foreignKey:ClientID"` // relationship
 }

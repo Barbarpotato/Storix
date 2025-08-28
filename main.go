@@ -48,7 +48,11 @@ func main() {
 		itemRoutes.POST("/", app.ItemHandler.Create)
 		itemRoutes.GET("/", app.ItemHandler.GetAll)
 		itemRoutes.GET("/:id", app.ItemHandler.Get)
+
 		itemRoutes.PUT("/:id", app.ItemHandler.Update)
+		itemRoutes.PUT("/:id/setActive", app.ItemHandler.SetActive)
+		itemRoutes.PUT("/:id/setInactive", app.ItemHandler.SetInactive)
+
 		itemRoutes.DELETE("/:id", app.ItemHandler.Delete)
 	}
 

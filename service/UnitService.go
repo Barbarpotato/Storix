@@ -21,8 +21,8 @@ func (s *UnitService) GetUnit(id uint64) (*models.Unit, error) {
 	return s.Repo.GetByID(id)
 }
 
-func (s *UnitService) GetUnits() ([]models.Unit, error) {
-	return s.Repo.GetAll()
+func (s *UnitService) GetUnits(page, pageSize int, sortBy, order string) ([]models.Unit, int64, error) {
+	return s.Repo.GetAll(page, pageSize, sortBy, order)
 }
 
 func (s *UnitService) UpdateUnit(unit *models.Unit) error {

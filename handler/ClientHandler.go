@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/Barbarpotato/Storix/models"
 	"github.com/Barbarpotato/Storix/service"
@@ -43,12 +44,27 @@ func (h *ClientHandler) Get(c *gin.Context) {
 }
 
 func (h *ClientHandler) GetAll(c *gin.Context) {
-	clients, err := h.Service.GetClients()
+	// defaults
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	sortBy := c.DefaultQuery("sort", "id")
+	order := strings.ToLower(c.DefaultQuery("order", "asc"))
+
+	clients, total, err := h.Service.GetClients(page, pageSize, sortBy, order)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, clients)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":      clients,
+		"total":     total,
+		"page":      page,
+		"pageSize":  pageSize,
+		"sort":      sortBy,
+		"order":     order,
+		"totalPage": int((total + int64(pageSize) - 1) / int64(pageSize)), // ceil
+	})
 }
 
 func (h *ClientHandler) Update(c *gin.Context) {

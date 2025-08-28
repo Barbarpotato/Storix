@@ -1,8 +1,12 @@
 package repository
 
 import (
-	"github.com/Barbarpotato/Storix/models"
+	"crypto/rand"
+	"encoding/hex"
+	"errors"
+	"strings"
 
+	"github.com/Barbarpotato/Storix/models"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +19,18 @@ func NewClientRepository(db *gorm.DB) *ClientRepository {
 }
 
 func (r *ClientRepository) Create(client *models.Client) error {
-	return r.DB.Create(client).Error
+	// generate random 16-char hex code
+	bytes := make([]byte, 8) // 8 bytes = 16 hex chars
+	if _, err := rand.Read(bytes); err != nil {
+		return err
+	}
+	client.Code = hex.EncodeToString(bytes)
+
+	// save to DB
+	if err := r.DB.Create(client).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *ClientRepository) GetByID(id uint64) (*models.Client, error) {
@@ -26,18 +41,67 @@ func (r *ClientRepository) GetByID(id uint64) (*models.Client, error) {
 	return &client, nil
 }
 
-func (r *ClientRepository) GetAll() ([]models.Client, error) {
-	var clients []models.Client
-	if err := r.DB.Find(&clients).Error; err != nil {
-		return nil, err
+func (r *ClientRepository) GetAll(page, pageSize int, sortBy, order string) ([]models.Client, int64, error) {
+	var (
+		clients []models.Client
+		total   int64
+	)
+
+	// ---- pagination defaults ----
+	if page < 1 {
+		page = 1
 	}
-	return clients, nil
+	if pageSize <= 0 {
+		pageSize = 10 // default perPage
+	}
+	if pageSize > 100 {
+		pageSize = 100 // max perPage
+	}
+
+	// ---- count total ----
+	if err := r.DB.Model(&models.Client{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// ---- allowed sort fields ----
+	allowedSort := map[string]bool{
+		"name":       true,
+		"code":       true,
+		"created_at": true,
+	}
+	if !allowedSort[sortBy] {
+		sortBy = "name" // default sort field
+	}
+
+	// ---- validate order ----
+	order = strings.ToLower(order)
+	if order != "asc" && order != "desc" {
+		order = "asc"
+	}
+
+	// ---- query with pagination + sorting ----
+	offset := (page - 1) * pageSize
+	if err := r.DB.
+		Order(sortBy + " " + order).
+		Limit(pageSize).
+		Offset(offset).
+		Find(&clients).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return clients, total, nil
 }
 
 func (r *ClientRepository) Update(client *models.Client) error {
-	return r.DB.Save(client).Error
+
+	return errors.New("update operation is not permitted on Client")
+
+	// return r.DB.Save(client).Error
 }
 
 func (r *ClientRepository) Delete(id uint64) error {
-	return r.DB.Delete(&models.Client{}, id).Error
+
+	return errors.New("delete operation is not permitted on Client")
+
+	// return r.DB.Delete(&models.Client{}, id).Error
 }
